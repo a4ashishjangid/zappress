@@ -1,0 +1,394 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* =============================================
+   ZAPPRESS DESIGN SYSTEM - Professional SaaS Light
+   ============================================= */
+
+.zappress-admin-wrap {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  margin: 0 !important;
+  border: none !important;
+  border-radius: 0 !important;
+  display: flex;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+  color: #0F172A;
+  z-index: 99999;
+  background: #F8FAFC !important;
+}
+
+/* WordPress Dashboard Fullscreen Overrides */
+#adminmenuback,
+#adminmenuwrap,
+#wpadminbar,
+#wpfooter {
+  display: none !important;
+}
+
+#wpcontent {
+  margin-left: 0 !important;
+  padding: 0 !important;
+  min-height: 100vh !important;
+}
+
+#wpbody-content {
+  padding-bottom: 0 !important;
+}
+
+html.wp-toolbar {
+  padding-top: 0 !important;
+}
+
+/* =============================================
+   CARD COMPONENT
+   ============================================= */
+.zappress-card {
+  background: #FFFFFF !important;
+  border-radius: 10px !important;
+  border: 1px solid #E2E8F0 !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04) !important;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease !important;
+}
+
+.zappress-card:hover {
+  border-color: #CBD5E1 !important;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08), 0 2px 4px rgba(15, 23, 42, 0.05) !important;
+  transform: none !important;
+}
+
+/* =============================================
+   BADGE COMPONENT
+   ============================================= */
+.zappress-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 9px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 9999px;
+  letter-spacing: 0.01em;
+}
+
+/* Status Badges */
+.zappress-badge-success {
+  background-color: #DCFCE7;
+  color: #15803D;
+  border: 1px solid #BBF7D0;
+}
+.zappress-badge-warning {
+  background-color: #FEF3C7;
+  color: #B45309;
+  border: 1px solid #FDE68A;
+}
+.zappress-badge-danger {
+  background-color: #FEE2E2;
+  color: #B91C1C;
+  border: 1px solid #FECACA;
+}
+.zappress-badge-info {
+  background-color: #CFFAFE;
+  color: #0E7490;
+  border: 1px solid #A5F3FC;
+}
+.zappress-badge-indigo {
+  background-color: #EEF2FF;
+  color: #4338CA;
+  border: 1px solid #C7D2FE;
+}
+
+/* =============================================
+   CUSTOM SCROLLBARS
+   ============================================= */
+.zappress-admin-wrap *::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+.zappress-admin-wrap *::-webkit-scrollbar-track {
+  background: #F1F5F9;
+}
+.zappress-admin-wrap *::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 10px;
+}
+.zappress-admin-wrap *::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+
+/* =============================================
+   GLOBAL FORM FIELD OVERRIDES
+   ============================================= */
+.zappress-admin-wrap input[type="text"],
+.zappress-admin-wrap input[type="password"],
+.zappress-admin-wrap input[type="email"],
+.zappress-admin-wrap input[type="url"],
+.zappress-admin-wrap input[type="number"],
+.zappress-admin-wrap select,
+.zappress-admin-wrap textarea {
+  background-color: #FFFFFF !important;
+  color: #0F172A !important;
+  border: 1px solid #E2E8F0 !important;
+  border-radius: 8px !important;
+  padding: 7px 12px !important;
+  font-size: 13px !important;
+  font-family: 'Inter', sans-serif !important;
+  transition: all 0.15s ease !important;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04) !important;
+}
+
+.zappress-admin-wrap input[type="text"]::placeholder,
+.zappress-admin-wrap input[type="password"]::placeholder,
+.zappress-admin-wrap input[type="email"]::placeholder,
+.zappress-admin-wrap input[type="url"]::placeholder,
+.zappress-admin-wrap input[type="number"]::placeholder,
+.zappress-admin-wrap textarea::placeholder {
+  color: #94A3B8 !important;
+}
+
+.zappress-admin-wrap input[type="text"]:focus,
+.zappress-admin-wrap input[type="password"]:focus,
+.zappress-admin-wrap input[type="email"]:focus,
+.zappress-admin-wrap input[type="url"]:focus,
+.zappress-admin-wrap input[type="number"]:focus,
+.zappress-admin-wrap select:focus,
+.zappress-admin-wrap textarea:focus {
+  border-color: #2563EB !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12) !important;
+  outline: none !important;
+}
+
+.zappress-admin-wrap input.zappress-input-error,
+.zappress-admin-wrap select.zappress-input-error,
+.zappress-admin-wrap textarea.zappress-input-error {
+  border-color: #EF4444 !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important;
+}
+
+/* =============================================
+   BUTTON SYSTEM
+   ============================================= */
+
+/* Primary Button */
+.zappress-btn-primary {
+  background-color: #2563EB !important;
+  border: 1px solid #2563EB !important;
+  color: #FFFFFF !important;
+  cursor: pointer;
+  font-weight: 600 !important;
+  font-size: 13px !important;
+  font-family: 'Inter', sans-serif !important;
+  transition: all 0.15s ease !important;
+  border-radius: 8px !important;
+  box-shadow: 0 1px 2px rgba(37, 99, 235, 0.2) !important;
+}
+.zappress-btn-primary:hover {
+  background-color: #1D4ED8 !important;
+  border-color: #1D4ED8 !important;
+  box-shadow: 0 4px 8px rgba(37, 99, 235, 0.25) !important;
+  transform: translateY(-1px);
+}
+.zappress-btn-primary:active {
+  transform: translateY(0) !important;
+  background-color: #1E40AF !important;
+}
+.zappress-btn-primary:disabled {
+  background-color: #93C5FD !important;
+  border-color: #93C5FD !important;
+  cursor: not-allowed !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+/* Secondary Button */
+.zappress-btn-secondary {
+  background-color: #FFFFFF !important;
+  border: 1px solid #E2E8F0 !important;
+  color: #374151 !important;
+  cursor: pointer;
+  font-weight: 600 !important;
+  font-size: 13px !important;
+  font-family: 'Inter', sans-serif !important;
+  transition: all 0.15s ease !important;
+  border-radius: 8px !important;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05) !important;
+}
+.zappress-btn-secondary:hover {
+  background-color: #F8FAFC !important;
+  border-color: #CBD5E1 !important;
+  box-shadow: 0 2px 4px rgba(15, 23, 42, 0.08) !important;
+}
+
+/* Danger Button */
+.zappress-btn-danger {
+  background-color: #EF4444 !important;
+  border: 1px solid #EF4444 !important;
+  color: #FFFFFF !important;
+  cursor: pointer;
+  font-weight: 600 !important;
+  font-size: 13px !important;
+  font-family: 'Inter', sans-serif !important;
+  transition: all 0.15s ease !important;
+  border-radius: 8px !important;
+}
+.zappress-btn-danger:hover {
+  background-color: #DC2626 !important;
+  border-color: #DC2626 !important;
+  box-shadow: 0 4px 8px rgba(239, 68, 68, 0.25) !important;
+}
+
+/* =============================================
+   STATUS PULSE ANIMATIONS
+   ============================================= */
+@keyframes status-pulse-green {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); }
+  50% { box-shadow: 0 0 0 5px rgba(34, 197, 94, 0); }
+}
+@keyframes status-pulse-amber {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
+  50% { box-shadow: 0 0 0 5px rgba(245, 158, 11, 0); }
+}
+@keyframes status-pulse-blue {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.35); }
+  50% { box-shadow: 0 0 0 5px rgba(37, 99, 235, 0); }
+}
+
+.zappress-pulse-green {
+  animation: status-pulse-green 2s infinite;
+}
+.zappress-pulse-amber {
+  animation: status-pulse-amber 2s infinite;
+}
+.zappress-pulse-blue {
+  animation: status-pulse-blue 2s infinite;
+}
+
+/* Interactive elements transitions */
+.zappress-transition {
+  transition: all 0.15s ease;
+}
+
+/* =============================================
+   CUSTOM SWITCH TOGGLE
+   ============================================= */
+.zappress-switch {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 22px;
+}
+.zappress-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.zappress-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #CBD5E1 !important;
+  transition: .25s ease;
+  border-radius: 20px;
+  border: 1px solid #E2E8F0 !important;
+}
+.zappress-slider:before {
+  position: absolute;
+  content: "";
+  height: 14px;
+  width: 14px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .25s ease;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.2);
+}
+input:checked + .zappress-slider {
+  background-color: #2563EB !important;
+  border-color: #2563EB !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
+}
+input:checked + .zappress-slider:before {
+  transform: translateX(18px);
+}
+
+/* =============================================
+   WORKFLOW NODE COLORS
+   ============================================= */
+.zappress-node-trigger   { border-left-color: #2563EB !important; }
+.zappress-node-condition { border-left-color: #F59E0B !important; }
+.zappress-node-api       { border-left-color: #4F46E5 !important; }
+.zappress-node-scheduler { border-left-color: #06B6D4 !important; }
+.zappress-node-database  { border-left-color: #8B5CF6 !important; }
+.zappress-node-email     { border-left-color: #10B981 !important; }
+.zappress-node-whatsapp  { border-left-color: #22C55E !important; }
+.zappress-node-ai        { border-left-color: #EC4899 !important; }
+.zappress-node-error     { border-left-color: #EF4444 !important; }
+
+/* =============================================
+   TABLE STYLES
+   ============================================= */
+.zappress-table thead th {
+  background-color: #F8FAFC;
+  color: #64748B;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 12px 16px;
+  border-bottom: 1px solid #E2E8F0;
+}
+.zappress-table tbody tr {
+  border-bottom: 1px solid #F1F5F9;
+  transition: background-color 0.1s ease;
+}
+.zappress-table tbody tr:hover {
+  background-color: #F8FAFC;
+}
+.zappress-table tbody td {
+  padding: 12px 16px;
+  color: #374151;
+  font-size: 13px;
+}
+
+/* =============================================
+   DIVIDERS
+   ============================================= */
+.zappress-divider {
+  border-color: #E2E8F0;
+}
+
+/* =============================================
+   MODAL / OVERLAY
+   ============================================= */
+.zappress-modal-overlay {
+  background-color: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(4px);
+}
+.zappress-modal {
+  background: #FFFFFF;
+  border-radius: 12px;
+  border: 1px solid #E2E8F0;
+  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.15), 0 8px 24px rgba(15, 23, 42, 0.08);
+}
+
+/* =============================================
+   CODE / MONO BLOCKS
+   ============================================= */
+.zappress-code {
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 6px;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+  font-size: 12px;
+  color: #374151;
+  padding: 12px 14px;
+}

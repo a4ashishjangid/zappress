@@ -1,0 +1,46 @@
+# =============================================================
+#  ZapPress — .gitignore
+# =============================================================
+
+# ── Node / Build tooling ─────────────────────────────────────
+admin/node_modules/
+admin/package-lock.json
+
+# ── Compiled output (optional: track build OR regenerate it)
+# Uncomment the next line if you want to exclude compiled assets
+# from Git and always build before release.
+# admin/build/
+
+# ── OS junk ──────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Editor / IDE ─────────────────────────────────────────────
+.vscode/
+.idea/
+*.suo
+*.user
+*.swp
+*.swo
+*~
+
+# ── Environment / secrets ────────────────────────────────────
+.env
+.env.local
+.env.*.local
+
+# ── WordPress log files ───────────────────────────────────────
+debug.log
+*.log
+
+# ── Plugin upload logs (runtime generated) ───────────────────
+uploads/zappress-logs/
+
+# ── Release zip output ───────────────────────────────────────
+releases/
+
+# ── Misc ─────────────────────────────────────────────────────
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
