@@ -24,7 +24,8 @@ class ZapPress_Engine {
 		$connections_list = ZapPress_DB::get_connections();
 		$connections_context = [];
 		foreach ( $connections_list as $conn ) {
-			$conn_slug = strtolower( str_replace( ' ', '_', $conn['name'] ) );
+			$conn_slug_legacy = strtolower( str_replace( ' ', '_', $conn['name'] ) );
+			$conn_slug = trim( preg_replace( '/[^a-z0-9]+/', '_', strtolower( $conn['name'] ) ), '_' );
 			$conn_service = strtolower( $conn['service'] );
 			
 			$creds = isset( $conn['credentials'] ) ? $conn['credentials'] : [];
@@ -39,8 +40,11 @@ class ZapPress_Engine {
 				}
 			}
 			
-			// Map connection credentials directly under name slug and service type
+			// Map connection credentials under normalized slug, legacy slug, and service type
 			$connections_context[ $conn_slug ] = $creds;
+			if ( $conn_slug_legacy !== $conn_slug ) {
+				$connections_context[ $conn_slug_legacy ] = $creds;
+			}
 			$connections_context[ $conn_service ] = $creds;
 		}
 
@@ -279,12 +283,12 @@ class ZapPress_Engine {
 
 		$duration = round( ( microtime( true ) - $start_time ) * 1000 );
 
-		// Save Execution Log
+		// Save Execution Log (with sanitized context to prevent credential leakage)
 		ZapPress_DB::create_log( [
 			'workflow_id'           => $workflow_id,
 			'status'                => $status,
 			'duration_ms'           => $duration,
-			'context_snapshot'      => $context,
+			'context_snapshot'      => self::sanitize_context_for_logging( $context ),
 			'request_response_data' => $step_logs,
 			'error_message'         => $error_message,
 		] );
@@ -419,7 +423,8 @@ class ZapPress_Engine {
 			$connections_list = ZapPress_DB::get_connections();
 			$connections_context = [];
 			foreach ( $connections_list as $conn ) {
-				$conn_slug = strtolower( str_replace( ' ', '_', $conn['name'] ) );
+				$conn_slug_legacy = strtolower( str_replace( ' ', '_', $conn['name'] ) );
+				$conn_slug = trim( preg_replace( '/[^a-z0-9]+/', '_', strtolower( $conn['name'] ) ), '_' );
 				$conn_service = strtolower( $conn['service'] );
 				
 				$creds = isset( $conn['credentials'] ) ? $conn['credentials'] : [];
@@ -434,8 +439,11 @@ class ZapPress_Engine {
 					}
 				}
 				
-				// Map connection credentials directly under name slug and service type
+				// Map connection credentials under normalized slug, legacy slug, and service type
 				$connections_context[ $conn_slug ] = $creds;
+				if ( $conn_slug_legacy !== $conn_slug ) {
+					$connections_context[ $conn_slug_legacy ] = $creds;
+				}
 				$connections_context[ $conn_service ] = $creds;
 			}
 			$context['connections'] = $connections_context;
@@ -570,7 +578,8 @@ class ZapPress_Engine {
 					if ( ! $response['success'] ) {
 						$status = 'failed';
 						$error_message = 'API Call Failed: ' . $response['error'];
-						self::schedule_step_retry( $workflow_id, $index, $context );
+						$context['next_step_index'] = $index;
+						$state = $context;
 						break 2;
 					}
 
@@ -591,7 +600,8 @@ class ZapPress_Engine {
 					if ( ! $response['success'] ) {
 						$status = 'failed';
 						$error_message = 'OpenAI AI Action Failed: ' . $response['error'];
-						self::schedule_step_retry( $workflow_id, $index, $context );
+						$context['next_step_index'] = $index;
+						$state = $context;
 						break 2;
 					}
 
@@ -657,11 +667,27 @@ class ZapPress_Engine {
 			'workflow_id'           => $workflow_id,
 			'status'                => $status,
 			'duration_ms'           => $duration,
-			'context_snapshot'      => $context,
+			'context_snapshot'      => self::sanitize_context_for_logging( $context ),
 			'request_response_data' => $step_logs,
 			'error_message'         => $error_message,
 		] );
 
 		return $status === 'success';
+	}
+
+	/**
+	 * Sanitize context before saving to execution logs to prevent credential leakage.
+	 *
+	 * @param array $context Runtime execution context.
+	 * @return array Sanitized context without decrypted credentials.
+	 */
+	public static function sanitize_context_for_logging( $context ) {
+		if ( ! is_array( $context ) ) {
+			return [];
+		}
+		$sanitized = $context;
+		unset( $sanitized['credentials'] );
+		unset( $sanitized['connections'] );
+		return $sanitized;
 	}
 }

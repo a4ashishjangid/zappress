@@ -13,11 +13,17 @@ trait ZapPress_Logger {
 
 	/**
 	 * Write a log entry payload directly to a flat file.
+	 * Disabled by default to protect sensitive runtime telemetry from unauthenticated access.
 	 *
 	 * @param int   $workflow_id Workflow ID.
 	 * @param array $data        Log context details.
 	 */
 	public static function write_file_log( $workflow_id, $data ) {
+		// Flat-file logging is disabled by default; database logging in wp_zappress_logs is used
+		if ( ! apply_filters( 'zappress_enable_file_logging', false ) ) {
+			return;
+		}
+
 		$upload_dir = wp_upload_dir();
 		if ( ! empty( $upload_dir['error'] ) ) {
 			return;
@@ -55,5 +61,36 @@ trait ZapPress_Logger {
 
 		// Append log entry to the file
 		file_put_contents( $log_file, $log_line, FILE_APPEND | LOCK_EX );
+	}
+
+	/**
+	 * Securely clean up legacy public log files.
+	 */
+	public static function cleanup_legacy_log_files() {
+		$upload_dir = wp_upload_dir();
+		if ( empty( $upload_dir['error'] ) ) {
+			$zappress_logs_dir = $upload_dir['basedir'] . '/zappress-logs';
+			if ( file_exists( $zappress_logs_dir ) ) {
+				self::delete_directory( $zappress_logs_dir );
+			}
+		}
+	}
+
+	/**
+	 * Recursively delete directory helper.
+	 */
+	public static function delete_directory( $dir ) {
+		if ( ! file_exists( $dir ) ) {
+			return;
+		}
+		$files = array_diff( scandir( $dir ), [ '.', '..' ] );
+		foreach ( $files as $file ) {
+			if ( is_dir( "$dir/$file" ) ) {
+				self::delete_directory( "$dir/$file" );
+			} else {
+				@unlink( "$dir/$file" );
+			}
+		}
+		return @rmdir( $dir );
 	}
 }

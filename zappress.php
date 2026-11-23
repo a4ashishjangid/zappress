@@ -44,6 +44,13 @@ function zappress_init() {
 	// Include DB manager
 	require_once ZAPPRESS_PLUGIN_DIR . 'includes/class-zappress-db.php';
 
+	// Database schema & legacy log cleanup migration check
+	if ( get_option( 'zappress_db_version' ) !== '1.0.1' ) {
+		ZapPress_Activator::activate();
+		ZapPress_DB::cleanup_legacy_log_files();
+		update_option( 'zappress_db_version', '1.0.1' );
+	}
+
 	// Include core workflow runner & engine
 	require_once ZAPPRESS_PLUGIN_DIR . 'includes/class-zappress-engine.php';
 

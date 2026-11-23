@@ -139,6 +139,15 @@ class ZapPress_API extends WP_REST_Controller {
 			],
 		] );
 
+		// Webhook Token Generator (Secure Server-Side Token Generation)
+		register_rest_route( $this->namespace, '/webhook/generate-token', [
+			[
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => [ $this, 'generate_webhook_token' ],
+				'permission_callback' => [ $this, 'permissions_check' ],
+			]
+		] );
+
 		// Webhook Receiver (Public Access)
 		register_rest_route( $this->namespace, '/webhook/(?P<token>[a-zA-Z0-9_-]+)', [
 			[
@@ -185,6 +194,22 @@ class ZapPress_API extends WP_REST_Controller {
 			return new WP_Error( 'missing_fields', 'Name and Trigger Type are required', [ 'status' => 400 ] );
 		}
 
+		// Ensure cryptographically secure token and uniqueness for webhook triggers
+		if ( $params['trigger_type'] === 'webhook' ) {
+			if ( ! isset( $params['trigger_config'] ) || ! is_array( $params['trigger_config'] ) ) {
+				$params['trigger_config'] = [];
+			}
+			if ( empty( $params['trigger_config']['webhook_token'] ) ) {
+				$params['trigger_config']['webhook_token'] = wp_generate_password( 32, false, false );
+			} else {
+				$token = sanitize_text_field( $params['trigger_config']['webhook_token'] );
+				$existing = ZapPress_DB::get_active_workflow_by_webhook_token( $token );
+				if ( $existing ) {
+					return new WP_Error( 'duplicate_token', 'Webhook token is already in use by another workflow.', [ 'status' => 400 ] );
+				}
+			}
+		}
+
 		$workflow_id = ZapPress_DB::create_workflow( $params );
 		if ( ! $workflow_id ) {
 			return new WP_Error( 'db_error', 'Failed to create workflow', [ 'status' => 500 ] );
@@ -203,6 +228,20 @@ class ZapPress_API extends WP_REST_Controller {
 		$workflow = ZapPress_DB::get_workflow( $id );
 		if ( ! $workflow ) {
 			return new WP_Error( 'not_found', 'Workflow not found', [ 'status' => 404 ] );
+		}
+
+		// Validate webhook token uniqueness on update
+		$trigger_type = isset( $params['trigger_type'] ) ? $params['trigger_type'] : $workflow['trigger_type'];
+		if ( $trigger_type === 'webhook' && isset( $params['trigger_config']['webhook_token'] ) ) {
+			$token = sanitize_text_field( $params['trigger_config']['webhook_token'] );
+			if ( ! empty( $token ) ) {
+				$existing = ZapPress_DB::get_active_workflow_by_webhook_token( $token );
+				if ( $existing && intval( $existing['id'] ) !== $id ) {
+					return new WP_Error( 'duplicate_token', 'Webhook token is already in use by another workflow.', [ 'status' => 400 ] );
+				}
+			} else {
+				$params['trigger_config']['webhook_token'] = wp_generate_password( 32, false, false );
+			}
 		}
 
 		$updated = ZapPress_DB::update_workflow( $id, $params );
@@ -362,19 +401,19 @@ class ZapPress_API extends WP_REST_Controller {
 	}
 
 	/**
+	 * Generate a cryptographically secure token for incoming webhooks.
+	 */
+	public function generate_webhook_token( $request ) {
+		$token = wp_generate_password( 32, false, false );
+		return new WP_REST_Response( [ 'token' => $token ], 200 );
+	}
+
+	/**
 	 * Handle incoming webhook calls and execute matching active workflows.
 	 */
 	public function handle_webhook( $request ) {
 		$token = sanitize_text_field( $request['token'] );
-		$workflows = ZapPress_DB::get_active_workflows_by_trigger( 'webhook' );
-
-		$matched_workflow = null;
-		foreach ( $workflows as $w ) {
-			if ( isset( $w['trigger_config']['webhook_token'] ) && $w['trigger_config']['webhook_token'] === $token ) {
-				$matched_workflow = $w;
-				break;
-			}
-		}
+		$matched_workflow = ZapPress_DB::get_active_workflow_by_webhook_token( $token );
 
 		if ( ! $matched_workflow ) {
 			return new WP_Error( 'not_found', 'Invalid or inactive webhook token', [ 'status' => 404 ] );

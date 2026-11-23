@@ -63,7 +63,7 @@ class ZapPress_AI_Actions {
 			'headers'   => $headers,
 			'body'      => $body,
 			'timeout'   => 45,
-			'sslverify' => false,
+			'sslverify' => apply_filters( 'zappress_sslverify', true ),
 		] );
 
 		if ( is_wp_error( $response ) ) {

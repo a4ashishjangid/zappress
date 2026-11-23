@@ -467,10 +467,16 @@ export default function Workflows({ apiRequest }) {
                         />
                         <button
                           type="button"
-                          onClick={() => {
+                          onClick={async () => {
                             if (!triggerConfig.webhook_token) {
-                              const randomToken = Math.random().toString(36).substring(2, 12) + Math.random().toString(36).substring(2, 12);
-                              setTriggerConfig({ ...triggerConfig, webhook_token: randomToken });
+                              try {
+                                const res = await apiRequest('/webhook/generate-token');
+                                if (res && res.token) {
+                                  setTriggerConfig({ ...triggerConfig, webhook_token: res.token });
+                                }
+                              } catch (err) {
+                                showError('Failed to generate token: ' + err.message);
+                              }
                             } else {
                               navigator.clipboard.writeText(`${window.zapPressSettings?.root || '/wp-json/'}zappress/v1/webhook/${triggerConfig.webhook_token}`);
                               showInfo('Webhook URL copied to clipboard!');

@@ -29,7 +29,8 @@ class ZapPress_Activator {
 			steps longtext NOT NULL,
 			created_at datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
 			updated_at datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
-			PRIMARY KEY  (id)
+			PRIMARY KEY  (id),
+			KEY status_trigger (status, trigger_type)
 		) $charset_collate;";
 
 		// Connections table (encrypted API credentials)
@@ -58,7 +59,8 @@ class ZapPress_Activator {
 			error_message text NOT NULL,
 			created_at datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
 			PRIMARY KEY  (id),
-			KEY workflow_id (workflow_id)
+			KEY workflow_id (workflow_id),
+			KEY status (status)
 		) $charset_collate;";
 
 		// Retries table
@@ -75,7 +77,8 @@ class ZapPress_Activator {
 			status varchar(50) DEFAULT 'pending' NOT NULL,
 			PRIMARY KEY  (id),
 			KEY workflow_id (workflow_id),
-			KEY status (status)
+			KEY status (status),
+			KEY status_next_run (status, next_run)
 		) $charset_collate;";
 
 		dbDelta( $sql_workflows );

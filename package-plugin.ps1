@@ -81,6 +81,8 @@ $Dest = "$TempDir\$PluginSlug"
 # ✅ Files & folders to INCLUDE
 $Includes = @(
     "zappress.php",
+    "uninstall.php",
+    "license.txt",
     "readme.txt",
     "includes",
     "admin\build",

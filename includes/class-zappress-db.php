@@ -337,4 +337,61 @@ class ZapPress_DB {
 
 		return $stats;
 	}
+
+	/**
+	 * Get active workflow matching exact webhook token via targeted SQL query.
+	 *
+	 * @param string $token Incoming webhook secret token.
+	 * @return array|null Matched workflow record or null.
+	 */
+	public static function get_active_workflow_by_webhook_token( $token ) {
+		global $wpdb;
+		$table = $wpdb->prefix . 'zappress_workflows';
+		$token_clean = sanitize_text_field( $token );
+		if ( empty( $token_clean ) ) {
+			return null;
+		}
+
+		$token_like = '%' . $wpdb->esc_like( $token_clean ) . '%';
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT * FROM $table WHERE status = 'active' AND trigger_type = 'webhook' AND trigger_config LIKE %s",
+				$token_like
+			),
+			ARRAY_A
+		);
+
+		if ( ! empty( $rows ) ) {
+			foreach ( $rows as $row ) {
+				$config = json_decode( $row['trigger_config'], true );
+				if ( is_array( $config ) && isset( $config['webhook_token'] ) ) {
+					// Strict constant-time string comparison for exact token match
+					if ( hash_equals( (string) $config['webhook_token'], (string) $token_clean ) ) {
+						$row['trigger_config'] = $config;
+						$row['steps'] = json_decode( $row['steps'], true ) ?: [];
+						return $row;
+					}
+				}
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * Purge execution logs older than a retention threshold (default 30 days).
+	 *
+	 * @param int $days Number of days to retain logs.
+	 * @return int|false Number of deleted rows.
+	 */
+	public static function purge_expired_logs( $days = 30 ) {
+		global $wpdb;
+		$table_logs = $wpdb->prefix . 'zappress_logs';
+		$days = max( 1, intval( $days ) );
+		$cutoff_mysql = gmdate( 'Y-m-d H:i:s', time() - ( $days * DAY_IN_SECONDS ) );
+
+		return $wpdb->query(
+			$wpdb->prepare( "DELETE FROM $table_logs WHERE created_at < %s", $cutoff_mysql )
+		);
+	}
 }

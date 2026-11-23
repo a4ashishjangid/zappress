@@ -102,6 +102,21 @@ class ZapPress_Scheduler {
 
 		// Process pending retries
 		self::process_pending_retries();
+
+		// Run periodic log cleanup maintenance once per day
+		self::maybe_run_daily_maintenance();
+	}
+
+	/**
+	 * Run daily maintenance tasks (log pruning, legacy files cleanup).
+	 */
+	public static function maybe_run_daily_maintenance() {
+		$last_purge = intval( get_option( 'zappress_last_daily_purge', 0 ) );
+		if ( time() - $last_purge >= DAY_IN_SECONDS ) {
+			update_option( 'zappress_last_daily_purge', time(), false );
+			ZapPress_DB::purge_expired_logs( 30 );
+			ZapPress_DB::cleanup_legacy_log_files();
+		}
 	}
 
 	/**
@@ -110,15 +125,15 @@ class ZapPress_Scheduler {
 	public static function process_pending_retries() {
 		global $wpdb;
 		$table_retries = $wpdb->prefix . 'zappress_retries';
-		$now_mysql = current_time( 'mysql' );
+		$now_utc = gmdate( 'Y-m-d H:i:s' );
 
 		$retries = $wpdb->get_results(
-			$wpdb->prepare( "SELECT * FROM $table_retries WHERE status = 'pending' AND next_run <= %s", $now_mysql ),
+			$wpdb->prepare( "SELECT * FROM $table_retries WHERE status = 'pending' AND next_run <= %s", $now_utc ),
 			ARRAY_A
 		);
 
 		foreach ( $retries as $r ) {
-			$execution_state = json_decode( $r['execution_state'], true );
+			$execution_state = json_decode( $r['execution_state'], true ) ?: [];
 			$workflow_id = intval( $r['workflow_id'] );
 			$attempt = intval( $r['attempt_count'] ) + 1;
 			$max = intval( $r['max_retries'] );
@@ -143,8 +158,9 @@ class ZapPress_Scheduler {
 
 					$next_run = gmdate( 'Y-m-d H:i:s', time() + ( $minutes * 60 ) );
 					$wpdb->update( $table_retries, [
-						'attempt_count' => $attempt,
-						'next_run'      => $next_run
+						'attempt_count'   => $attempt,
+						'next_run'        => $next_run,
+						'execution_state' => wp_json_encode( $execution_state ),
 					], [ 'id' => $r['id'] ] );
 				}
 			}

@@ -15,7 +15,7 @@ class ZapPress_Triggers {
 		// Core WP Triggers
 		add_action( 'user_register', [ $this, 'wp_user_registered' ], 10, 1 );
 		add_action( 'wp_login', [ $this, 'wp_user_login' ], 10, 2 );
-		add_action( 'publish_post', [ $this, 'wp_post_published' ], 10, 2 );
+		add_action( 'transition_post_status', [ $this, 'wp_post_status_transition' ], 10, 3 );
 		add_action( 'post_updated', [ $this, 'wp_post_updated' ], 10, 3 );
 		add_action( 'comment_post', [ $this, 'wp_comment_added' ], 10, 3 );
 
@@ -68,24 +68,49 @@ class ZapPress_Triggers {
 		}
 	}
 
+	/**
+	 * Trigger workflow only when a post transitions from a non-published state to published.
+	 */
+	public function wp_post_status_transition( $new_status, $old_status, $post ) {
+		// Only trigger when moving from a non-published status to published
+		if ( 'publish' !== $new_status || 'publish' === $old_status ) {
+			return;
+		}
+		if ( ! $post || ! isset( $post->ID ) ) {
+			return;
+		}
+		// Ignore revisions & autosaves
+		if ( wp_is_post_revision( $post->ID ) || wp_is_post_autosave( $post->ID ) ) {
+			return;
+		}
+		$context = [
+			'post_id'      => $post->ID,
+			'post_title'   => $post->post_title,
+			'post_content' => $post->post_content,
+			'post_url'     => get_permalink( $post->ID ),
+			'author_email' => get_the_author_meta( 'user_email', $post->post_author ),
+		];
+		$this->trigger_workflows( 'wp_post_published', $context );
+	}
+
 	public function wp_post_published( $post_id, $post ) {
 		// Ignore revisions & autosaves
-		if ( wp_is_post_revision( $post_id ) ) {
+		if ( wp_is_post_revision( $post_id ) || wp_is_post_autosave( $post_id ) ) {
 			return;
 		}
 		$context = [
 			'post_id'      => $post_id,
-			'post_title'   => $post->post_title,
-			'post_content' => $post->post_content,
+			'post_title'   => $post ? $post->post_title : '',
+			'post_content' => $post ? $post->post_content : '',
 			'post_url'     => get_permalink( $post_id ),
-			'author_email' => get_the_author_meta( 'user_email', $post->post_author ),
+			'author_email' => $post ? get_the_author_meta( 'user_email', $post->post_author ) : '',
 		];
 		$this->trigger_workflows( 'wp_post_published', $context );
 	}
 
 	public function wp_post_updated( $post_id, $post_after, $post_before ) {
 		// Ignore revisions & autosaves
-		if ( wp_is_post_revision( $post_id ) ) {
+		if ( wp_is_post_revision( $post_id ) || wp_is_post_autosave( $post_id ) ) {
 			return;
 		}
 		$context = [
